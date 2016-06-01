@@ -12,12 +12,13 @@
 add_action('admin_menu', 'plugin_setup_menu');
 
 function plugin_setup_menu(){
-    add_menu_page( 'Caching Plugin Page', 'Caching Settings', 'manage_options', 'test-plugin', 'test_init' );
+    add_menu_page( 'Caching Plugin Page', 'Caching Settings', 'manage_options', 'cache-plugin', 'test_init' );
 }
  
 function test_init(){
     echo "<h1>Caching Plugin</h1>";
     echo "<h3><b>Caching:</b></h3>";
+    echo "<p>Turning the Caching On will cache your posts and pages to reduce processing load.</p>";
 ?>
       <!-- Form to handle the upload - The enctype value here is very important -->
     <form  method="post" enctype="multipart/form-data">    
@@ -39,7 +40,7 @@ function test_init(){
     <input type="hidden" value="true" name="delete" />
     <?php submit_button('Delete Cache');
     // if delete button is clicked
-    if (isset($_POST['delete'])) {delete_cache(); }
+    if (isset($_POST['delete'])) {delete_post_cache(); }
 }
 
 function validate_caching_choice(){
@@ -48,12 +49,13 @@ function validate_caching_choice(){
     {
         if( $choice == "1" ) 
         {
-            showMessage("Yes to caching!");
-            enable_caching();
+            showMessage("Cache successfully turned on..");
+            post_caching($new_post);
         }
         else if( $choice== "2" ) 
         {
-            showMessage("No to cache?");
+            showMessage("Cache successfully turned off..");
+            
         }else{
             showMessage("Something's ain't right.");
         }
@@ -64,33 +66,63 @@ function validate_caching_choice(){
     
 }
 
-function enable_caching(){
-    // i'm using wordpress transient API because it lasts longer than WP object cache
-
+function post_caching($new_post){
     // CACHE POSTS
-    
-    if( ($posts = get_transient("posts")) === false) 
+    if( ($posts = get_transient("posts")) === false) // if there's no transient yet called posts
     {
         //select the data/posts you want from db
         $args = array(
             'post_type' => 'post',
               'orderby'   => 'title',
               'order'     => 'ASC',
-              'post_status' => 'any'
+              'post_status' => 'publish'
         );
 
         $posts = new WP_Query($args);
         set_transient("posts", $posts, 0); //zero - no expiration for transients
     } 
     
-    wp_die();
-    if($posts->have_posts()){
-        while($posts->have_posts()) : $posts->the_post(); 
-        //display the post
-        endwhile; 
-    }else{ 
-        //display no posts found message
-    }  
+     // if there's a post in transient, get all posts then save to array to be use in add_filter
+    if($posts->have_posts())
+    {
+        $query = $posts->get_posts();
+        //var_dump($query);
+        foreach($query as $post) {
+            //Replace current posts with data from transient/cache
+            $new_post = $post->post_content;
+            //print_r($new_post);
+            
+            return $new_post;
+        }   
+
+    }else{
+        showMessage("Theres no post");
+    }
+    //restores the $post global to the current post in the main query.
+    wp_reset_postdata(); 
+
+}
+
+ add_filter('the_content', 'post_caching');
+
+
+function page_caching(){
+    // i'm using wordpress transient API because it lasts longer than WP object cache
+
+    // CACHE PAGES
+    if( ($pages = get_transient("pages")) === false) // if there's no transient yet called posts
+    {
+        //select the data/posts you want from db
+        $args = array(
+            'post_type' => 'page',
+              'orderby'   => 'title',
+              'order'     => 'ASC',
+              'post_status' => 'publish'
+        );
+
+        $pages = new WP_Query($args);
+        set_transient("pages", $pages, 0); //zero - no expiration for transients
+    } 
     //restores the $post global to the current post in the main query.
     wp_reset_postdata(); 
 
@@ -100,8 +132,20 @@ function disable_caching(){
 
 }
 
-function delete_cache(){
+function delete_post_cache(){
+    global $posts;
+    if( $post->post_type == 'post' ) {
+        delete_transient( "posts" );
+        showMessage("Cache Deleted..");
+    }
+}
 
+function delete_page_cache(){
+    global $posts;
+    if( $post->post_type == 'page' ) {
+        delete_transient( "pages" );
+        showMessage("Cache Deleted..");
+    }
 }
 
 function showMessage($message, $errormsg = false)
