@@ -86,7 +86,7 @@ function post_caching($new_post){
     if($posts->have_posts())
     {
         $query = $posts->get_posts();
-        //var_dump($query);
+        print_r($query->post_content);
         foreach($query as $post) {
             //Replace current posts with data from transient/cache
             $new_post = $post->post_content;
@@ -107,8 +107,6 @@ function post_caching($new_post){
 
 
 function page_caching(){
-    // i'm using wordpress transient API because it lasts longer than WP object cache
-
     // CACHE PAGES
     if( ($pages = get_transient("pages")) === false) // if there's no transient yet called posts
     {
