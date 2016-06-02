@@ -61,11 +61,8 @@ function validate_caching_choice(){
         }
    }else{
         showMessage("Empty Variable.");
-    } 
-
-    
+    }     
 }
-
 
 function post_caching(){
     // CACHE POSTS
@@ -73,12 +70,12 @@ function post_caching(){
     {
         $args = array(
             'post_type' => 'post',
-              'orderby'   => 'title',
-              'order'     => 'ASC',
+              'orderby'   => 'datee',
+              'order'     => 'DESC',
               'post_status' => 'publish'
         );
         $posts = new WP_Query($args);
-        set_transient("posts", $posts, 0); //zero - no expiration for transients
+        set_transient("posts", $posts, 28800); //zero - no expiration for transients
         return $posts;
     } 
     //restores the $post global to the current post in the main query.
