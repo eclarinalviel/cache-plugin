@@ -71,7 +71,6 @@ function post_caching(){
     // CACHE POSTS
     if( ($posts = get_transient("posts")) === false) // if there's no transient yet called posts
     {
-        //select the data/posts you want from db
         $args = array(
             'post_type' => 'post',
               'orderby'   => 'title',
@@ -82,75 +81,58 @@ function post_caching(){
         set_transient("posts", $posts, 0); //zero - no expiration for transients
         return $posts;
     } 
-   
-   // post_filter($posts);
     //restores the $post global to the current post in the main query.
    wp_reset_postdata(); 
 
 }
 
+add_filter('the_content', 'post_filter');
 function post_filter($posts){
     //if there's a post in transient, get all posts then save to array to be use in add_filter
     if($posts)
     {
-        // if(has_filter('the_content')) {
-        //     $posts = apply_filters('the_content', $posts);
-        // }
-        // $filtered_post = array();
-       // $array_post = array();
         $query = get_posts($posts);
-        // var_dump($query);
         foreach($query as $post) {
             //Replace current posts with data from transient/cache
            $filtered_post = $post->post_content;
-            
         }  
-       // print_r($filtered_post);
-        return $filtered_post;
+        //print_r($filtered_post);
+        return conte$filtered_post;
     }else{showMessage("Theres no post.");}
 }
-add_filter('the_content', 'post_filter');
 
 
-function page_caching(){
-    // CACHE PAGES
-    if( ($pages = get_transient("pages")) === false) // if there's no transient yet called posts
-    {
-        //select the data/posts you want from db
-        $args = array(
-            'post_type' => 'page',
-              'orderby'   => 'title',
-              'order'     => 'ASC',
-              'post_status' => 'publish'
-        );
+// function page_caching(){
+//     // CACHE PAGES
+//     if( ($pages = get_transient("pages")) === false) // if there's no transient yet called posts
+//     {
+//         //select the data/posts you want from db
+//         $args = array(
+//             'post_type' => 'page',
+//               'orderby'   => 'title',
+//               'order'     => 'ASC',
+//               'post_status' => 'publish'
+//         );
 
-        $pages = new WP_Query($args);
-        set_transient("pages", $pages, 0); //zero - no expiration for transients
-    } 
-    //restores the $post global to the current post in the main query.
-    wp_reset_postdata(); 
+//         $pages = new WP_Query($args);
+//         set_transient("pages", $pages, 0); //zero - no expiration for transients
+//     } 
+//     //restores the $post global to the current post in the main query.
+//     wp_reset_postdata(); 
 
-}
+// }
 
-function disable_caching(){
+// function disable_caching(){
 
-}
+// }
 
-function delete_post_cache(){
-    global $posts;
-    if( $posts->post_type == 'post' ) {
-        delete_transient( "posts" );
-        showMessage("Cache Deleted..");
-    }
-}
-
-function delete_page_cache(){
-    global $posts;
-    if( $posts->post_type == 'page' ) {
-        delete_transient( "pages" );
-        showMessage("Cache Deleted..");
-    }
-}
+// function delete_post_cache(){
+//     global $posts;
+//     if( $posts->post_type == 'post' ) {
+//         delete_transient( "posts" );
+//         showMessage("Cache Deleted..");
+//     }
+// }
 
 function showMessage($message, $errormsg = false)
 {
