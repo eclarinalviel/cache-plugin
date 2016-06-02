@@ -102,38 +102,6 @@ function post_filter($posts){
 }
 
 
-// function page_caching(){
-//     // CACHE PAGES
-//     if( ($pages = get_transient("pages")) === false) // if there's no transient yet called posts
-//     {
-//         //select the data/posts you want from db
-//         $args = array(
-//             'post_type' => 'page',
-//               'orderby'   => 'title',
-//               'order'     => 'ASC',
-//               'post_status' => 'publish'
-//         );
-
-//         $pages = new WP_Query($args);
-//         set_transient("pages", $pages, 0); //zero - no expiration for transients
-//     } 
-//     //restores the $post global to the current post in the main query.
-//     wp_reset_postdata(); 
-
-// }
-
-// function disable_caching(){
-
-// }
-
-// function delete_post_cache(){
-//     global $posts;
-//     if( $posts->post_type == 'post' ) {
-//         delete_transient( "posts" );
-//         showMessage("Cache Deleted..");
-//     }
-// }
-
 function showMessage($message, $errormsg = false)
 {
     if ($errormsg) {
