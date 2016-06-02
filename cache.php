@@ -97,12 +97,12 @@ function post_filter($posts){
         //     $posts = apply_filters('the_content', $posts);
         // }
         // $filtered_post = array();
-        $array_post = array();
+       // $array_post = array();
         $query = get_posts($posts);
         // var_dump($query);
         foreach($query as $post) {
             //Replace current posts with data from transient/cache
-           $filtered_post .= $post->post_content;
+           $filtered_post = $post->post_content;
             
         }  
        // print_r($filtered_post);
