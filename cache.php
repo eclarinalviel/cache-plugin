@@ -50,7 +50,7 @@ function validate_caching_choice(){
         if( $choice == "1" ) 
         {
             showMessage("Cache successfully turned on..");
-            post_caching($new_post);
+            post_caching();
         }
         else if( $choice== "2" ) 
         {
@@ -66,7 +66,8 @@ function validate_caching_choice(){
     
 }
 
-function post_caching($new_post){
+
+function post_caching(){
     // CACHE POSTS
     if( ($posts = get_transient("posts")) === false) // if there's no transient yet called posts
     {
@@ -77,33 +78,38 @@ function post_caching($new_post){
               'order'     => 'ASC',
               'post_status' => 'publish'
         );
-
         $posts = new WP_Query($args);
         set_transient("posts", $posts, 0); //zero - no expiration for transients
+        return $posts;
     } 
-    
-     // if there's a post in transient, get all posts then save to array to be use in add_filter
-    if($posts->have_posts())
-    {
-        $query = $posts->get_posts();
-        print_r($query->post_content);
-        foreach($query as $post) {
-            //Replace current posts with data from transient/cache
-            $new_post = $post->post_content;
-            //print_r($new_post);
-            
-            return $new_post;
-        }   
-
-    }else{
-        showMessage("Theres no post");
-    }
+   
+   // post_filter($posts);
     //restores the $post global to the current post in the main query.
-    wp_reset_postdata(); 
+   wp_reset_postdata(); 
 
 }
 
- add_filter('the_content', 'post_caching');
+function post_filter($posts){
+    //if there's a post in transient, get all posts then save to array to be use in add_filter
+    if($posts)
+    {
+        // if(has_filter('the_content')) {
+        //     $posts = apply_filters('the_content', $posts);
+        // }
+        // $filtered_post = array();
+        $array_post = array();
+        $query = get_posts($posts);
+        // var_dump($query);
+        foreach($query as $post) {
+            //Replace current posts with data from transient/cache
+           $filtered_post .= $post->post_content;
+            
+        }  
+       // print_r($filtered_post);
+        return $filtered_post;
+    }else{showMessage("Theres no post.");}
+}
+add_filter('the_content', 'post_filter');
 
 
 function page_caching(){
@@ -132,7 +138,7 @@ function disable_caching(){
 
 function delete_post_cache(){
     global $posts;
-    if( $post->post_type == 'post' ) {
+    if( $posts->post_type == 'post' ) {
         delete_transient( "posts" );
         showMessage("Cache Deleted..");
     }
@@ -140,7 +146,7 @@ function delete_post_cache(){
 
 function delete_page_cache(){
     global $posts;
-    if( $post->post_type == 'page' ) {
+    if( $posts->post_type == 'page' ) {
         delete_transient( "pages" );
         showMessage("Cache Deleted..");
     }
