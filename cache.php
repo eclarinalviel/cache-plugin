@@ -97,7 +97,7 @@ function post_filter($posts){
            $filtered_post = $post->post_content;
         }  
         //print_r($filtered_post);
-        return conte$filtered_post;
+        return $filtered_post;
     }else{showMessage("Theres no post.");}
 }
 
