@@ -89,15 +89,18 @@ function post_caching(){
 add_filter('the_content', 'post_filter');
 function post_filter($posts){
     //if there's a post in transient, get all posts then save to array to be use in add_filter
-    if($posts)
+    if(!empty($posts))
     {
         $query = get_posts($posts);
+        // $filtered_post = array();
         foreach($query as $post) {
             //Replace current posts with data from transient/cache
-           $filtered_post = $post->post_content;
+            $filtered_post = get_the_ID($post);
+            $new_post = get_post($filtered_post);
+            //print_r($new_post->post_content);          
         }  
-        //print_r($filtered_post);
-        return $filtered_post;
+
+       return $new_post->post_content;
     }else{showMessage("Theres no post.");}
 }
 
